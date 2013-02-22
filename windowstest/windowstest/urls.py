@@ -11,6 +11,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    (r'^$', 'core.views.index'),
-    (r'^add/$', 'core.views.add_todo'),
+    (r'^$', 'windowstest.core.views.index'),
+    (r'^add/$', 'windowstest.core.views.add_todo'),
 )
