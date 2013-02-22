@@ -37,9 +37,10 @@ Getting it working
         django-mssql==1.2
         pywin32==218
 
-1. Edit settings.py to use the parameters for your mssql installation
+1. Edit `settings.py` to use the parameters for your mssql installation
 
 1. Initialize the database
-    python manage.py syncdb
+
+        python manage.py syncdb
     
 1. That's all.
