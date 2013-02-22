@@ -12,7 +12,30 @@ The to-do app is almost completely taken from [this net tuts tutorial](http://ne
 Getting it working
 -------------------
 1. Clone into working directory
-    git clone git@github.com:turtlemonvh/django-windows-test.git
+
+        git clone git@github.com:turtlemonvh/django-windows-test.git
+
+1. Create a virtual env and activate it
+
+        virtualenv --no-site-packages ENVIRONMENT_NAME
+        ENVIRONMENT_NAME\Scripts\Activate
+
+1. Install pywin32
+  1. Download executable from [the project website](http://sourceforge.net/projects/pywin32/files/pywin32/)
+  1. Install with easy_install
+
+             easy_install \path\to\download\x.exe
+
+1. Install Django and MsSQL driver package
+
+        pip install django
+        pip install django-mssql
+
+1. CHECKPOINT: Check your installed packages using `pip freeze`.  Should resemble the following, with version numbers possibly changes.
+
+        Django==1.4.5
+        django-mssql==1.2
+        pywin32==218
 
 1. Edit settings.py to use the parameters for your mssql installation
 
@@ -20,5 +43,3 @@ Getting it working
     python manage.py syncdb
     
 1. That's all.
-
-
