@@ -9,6 +9,8 @@ Where this comes from
 
 * The to-do app used here is almost completely taken from [this net tuts tutorial](http://net.tutsplus.com/tutorials/python-tutorials/intro-to-django-building-a-to-do-list/) with a few changes to make it cleaner (e.g. use of django forms).
 
+* More information about PyISAPIe was taken from [a blog post by geographika](http://geographika.co.uk/setting-up-python-on-iis7).
+
 Setting up python
 -------------------
 1. Clone into working directory
@@ -68,7 +70,7 @@ Setting up Windows
       * Set port to `8090` or another unused port
   * Left (select) click on the new site to get to the main options screen.
   * Under `IIS`, double click on `Handler Mappings` to option that dialog
-  * In the right pane under `Actions`, select the `Add Script Map` option
+  * In the right pane under `Actions`, select the `Add Wildcard Script Map` option
       * Set request path to `*`
       * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
       * Set name to `PyISAPIe`
@@ -91,12 +93,17 @@ Getting it running
 
 Notes
 -------------------
+* If you are getting the error `You probably did a passthrough with PyISAPIe configured as an application map instead of a wildcard map` (displayed as a generic error page in IE)
+
+  Check to make sure you defined your hander mapping for PyISAPIe as a "Wildcard Script Map" and not a "Script Map".
+
 * If you change anything in `c:\PyISAPIe` or `c:\inetpub\django` (the application driver directory and your application directory, respectively), you may need to recycle your application pool to see these changes take effect.
 
   To do this, click on `Application Pools` in the left view pane of the IIS Manager, select `DjangoApp`, and click the `Recycle` task in the right view pane.
 
 !!TODO!!
 -------------------
+
 * Add instructions for configuring `Isapi.py` file for connection to django application
   * This is set up like an Apache virtualhosts file, each host forwarding to some base url
   * Just use one host at base url for a normal installation
