@@ -3,6 +3,7 @@ from models import todo
 from forms import ToDoForm  
 from django.shortcuts import render, render_to_response  
 from django.http import HttpResponseRedirect
+import sys
 
 def index(request):
     items = todo.objects.all() 
@@ -11,7 +12,11 @@ def index(request):
         'form': form,
         'items': items
     })    
-    
+
+def test_path(request):
+	path = sys.path
+	return render_to_response("testpath.html", locals())
+	
 def add_todo(request):
     if request.method == 'POST': # If the form has been submitted...
         form = ToDoForm(request.POST) # A form bound to the POST data

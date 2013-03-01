@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     (r'^$', 'windowstest.core.views.index'),
     (r'^add/$', 'windowstest.core.views.add_todo'),
+    (r'^test/$', 'windowstest.core.views.test_path'),
 )
