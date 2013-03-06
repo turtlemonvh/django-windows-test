@@ -4,6 +4,8 @@
 {% else %}
     <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
 {% endif %}
+<hr />  
+<hr />  
 {% for x in items %}  
 <p>{{ x.name }} : Created on {{ x.created|date:"D d M Y" }} by {{ x.user }}</p>  
 <p>{{ x.description }}</p>  
