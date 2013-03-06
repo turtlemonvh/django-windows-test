@@ -9,29 +9,19 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'to-do.db',                      # Or path to database file if using sqlite3.
-            'USER': '',                      # Not used with sqlite3.
-            'PASSWORD': '',                  # Not used with sqlite3.
-            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        }
-    }
-else:
-    # MsSQL
-    # http://django-mssql.readthedocs.org/en/latest/quickstart.html#installation
-    DATABASES = {
-        'default': {
-            'NAME': 'my_database',
-            'ENGINE': 'sqlserver_ado',
-            'HOST': 'dbserver\\ss2008',
-            'USER': '',
-            'PASSWORD': '',
-        }
-    }
+#import sqlserver_ado
+
+# MsSQL
+# http://django-mssql.readthedocs.org/en/latest/quickstart.html#installation
+DATABASES = {
+	'default': {
+		'NAME': 'dsef',
+		'ENGINE': 'sqlserver_ado',
+		'HOST': 'localhost',
+		'USER': 'dsef_test_user',
+		'PASSWORD': 'NewPassword1!',
+	}
+}
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
@@ -138,6 +128,16 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'windowstest.core',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+AUTH_LDAP_SERVER_URI = "ldap://dsef-ad.dsef.private" # 10.20.30.183:389
+AUTH_LDAP_USER_DN_TEMPLATE = "%(user)s@DSEF.private"
+
+LOGIN_REDIRECT_URL = "/"
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

@@ -1,10 +1,15 @@
-<h2>To Do</h2>  
+<h2>To Do</h2>
+{% if user.is_authenticated %}
+    <p>Welcome, {{ user.username }}. Thanks for logging in.  You can log out <a href="{% url 'logout' %}">here</a>.</p>
+{% else %}
+    <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
+{% endif %}
 {% for x in items %}  
-<p>{{ x.name }} : Created {{ x.created|date:"D d M Y" }}</p>  
+<p>{{ x.name }} : Created on {{ x.created|date:"D d M Y" }} by {{ x.user }}</p>  
 <p>{{ x.description }}</p>  
 <hr />  
 {% endfor %}  
-<form action="/add/" method="post">{% csrf_token %}
+<form action="add/" method="post">{% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Submit" />
 </form>

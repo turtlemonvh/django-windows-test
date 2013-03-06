@@ -14,4 +14,7 @@ urlpatterns = patterns('',
     (r'^$', 'windowstest.core.views.index'),
     (r'^add/$', 'windowstest.core.views.add_todo'),
     (r'^test/$', 'windowstest.core.views.test_path'),
+    
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'registration/login.html'}, name='login'),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'template_name': 'registration/logout.html'}, name='logout'),
 )

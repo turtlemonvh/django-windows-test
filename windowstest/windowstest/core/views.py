@@ -11,7 +11,7 @@ def index(request):
     return render(request, 'index.html', {
         'form': form,
         'items': items
-    })    
+    })
 
 def test_path(request):
 	path = sys.path
@@ -21,9 +21,13 @@ def add_todo(request):
     if request.method == 'POST': # If the form has been submitted...
         form = ToDoForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            # https://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
-            form.save()            
+            # https://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method			
+            new_todo = form.save(commit=False)
+            new_todo.user = request.user if request.user.is_authenticated() else None
+            new_todo.save()
             return HttpResponseRedirect('/') # Redirect after POST
+
+                
     else:
         form = ToDoForm() # An unbound form
 
