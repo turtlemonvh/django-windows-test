@@ -9,7 +9,7 @@ Where this comes from
 * The to-do app used here is almost completely taken from [this net tuts tutorial](http://net.tutsplus.com/tutorials/python-tutorials/intro-to-django-building-a-to-do-list/) with a few changes to make it cleaner (e.g. use of django forms).
 * More information about PyISAPIe was taken from [a blog post by geographika](http://geographika.co.uk/setting-up-python-on-iis7).
 
-Installing and configuring python on target machine
+Installing and configuring python and pytrhon packages on target machine
 -------------------
 1. Get this project onto the target machine
 
@@ -48,7 +48,7 @@ Installing and configuring python on target machine
   * Copy all 3 DLL files from the `pywin32_system32` folder to `C:\Python27`
   * **If you skip this step you may find you have problems with MS SQL later on.**
 
-CHECKPOINT: Check your installed packages using `pip freeze`.  Should resemble the following, with version numbers possibly changes.
+_CHECKPOINT:_ Check your installed packages using `pip freeze`.  The output should resemble the following, with version numbers possibly changed.
 
     Django==1.4.5
     django-auth-ldap==1.1.3
@@ -81,10 +81,10 @@ Setting up IIS to talk to Python through PyISAPIe
   You can download the zip file and unzip to that directory, or [install a flavor of git that plays nice with Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) and clone into that directory.
 
 1. Add a new site using the IIS Manager
-  Here you will add a site and set it up to be handled by isapie.
+  Here you will add a site and set it up to be handled by python via isapi.
 
   * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
-      * Set name to `DjangoApp`
+      * Set name to _DjangoApp_
       * Set physical path to `c:\inetpub\django`
       * Set port to `8090` or another unused port
   * Left (select) click on the new site to get to the main options screen.
@@ -94,7 +94,78 @@ Setting up IIS to talk to Python through PyISAPIe
       * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
       * Set name to `PyISAPIe`
 
-Setting up MS SQL
+1. Set the new site to run on port *80, and change the default website to run on *8090.
+
+   You may want to run your site on port 80 so you don't have to type in a port number when accessing it and you don't have to play with Windows Firewall settings to open a new port.
+
+  * To change the port for a website, start the IIS Manager and click on _Sites_ on the left pane.  
+  * Right click on a site and select _bindings_.
+  * Click on the port binding you want to edit and select _Edit..._.
+  * Change the port number in the dialog window that pops up and click _OK_ then _Close_ to accept the changes and close both dialog boxes.
+  * You then must click _Restart_ under the _Manage Web Site_ heading on the right pane of the IIS Manger for these changes to take effect.
+
+_CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and see a Django error page.  You can't see the home page yet because the database hasn't been configured.
+
+Serving static files for Django directly via IIS
+-------------------
+1. Make sure your `PyISAPIe` handler is defined as a `ScriptMap` and not a `Wildcard Script Map`.  A wildcard map will intercept every request for every file in all sub folders which would not allow your static files to be served.
+
+1. Check your `Isapi.py` file (in `C:\PyISAPIe\Http\`) to make sure you have the following line in the `Map` array
+
+        ["/media" , lambda: True        ], # exclude and passthrough
+
+    This instructs the Isapi dll to pass off handling of requests to `/media` to the next available handler, which in our case will be the StaticFile handler.  This should be above the line in this array mapping `"/"` to your settings file.
+
+1. Configure `settings.py` to use the following values defining the location of static and media files.
+
+        MEDIA_ROOT = 'media/media/'
+        MEDIA_URL = 'media/media/'
+        STATIC_ROOT = 'media/static/'
+        STATIC_URL = '/media/static/'
+
+1. Run `python manage.py collectstatic` at the command line to collect static and media files into the target directories.
+        
+1. Add a Virtual Directory to the _DjangoApp_ web site in IIS Manager
+
+    1. In the IIS Manager, right click in the top level folder _DjangoApp_.
+    1. Select _Add Virtual Directory_.
+    1. For the alias type `media`.
+    1. For the physical path select the static root of your application (where `collectstatic` dumped the files).
+    1. Click _OK_.  You should not see an additional folder under _DjangoApp_ which links to your `media` folder.
+
+1. Set up the new virtual directory to use the `StaticFile` handler before the `PyISAPIe` handler
+
+  Handler mappings defined at the _DjangoApp_ level for your site (i.e. the top level) are inherited for each directory of that site, including the virtual directories.  Though `PyISAPIe` should be the first handler for _DjangoApp_ as a whole, the `media` directory needs to have the `StaticFile` handler ordered first.  To fix this:
+
+    1. In IIS Manager click on the `media` virtual directory folder to select
+    1. In the center options pane under _IIS_ double click _Handler Mappings_.
+    1. In the right _Actions_ pane of the _Handler Mappings_ view, click the _View Ordered List_ link.
+    1. Use the arrows in the right pane of the resulting view to move the `StaticFile` handler up to the top of the list, above the `PyISAPIe` handler.
+   
+1. Create a new `web.config` file in `c:\inetpub\django\django-windows-test\windowstest\` with the following contents.
+
+        <configuration>
+            <system.webServer>
+                <handlers>
+                   <clear />
+                    <add 
+                        name="StaticFile" 
+                        path="*" verb="*" 
+                        modules="StaticFileModule,DefaultDocumentModule,DirectoryListingModule" 
+                        resourceType="Either" 
+                        requireAccess="Read" />
+                </handlers>
+                <staticContent>
+                    <mimeMap fileExtension=".*" mimeType="application/octet-stream" />
+                </staticContent>
+            </system.webServer>
+        </configuration>
+     
+1. Refresh the application pool for _DjangoApp_.  
+
+_CHECKPOINT:_ You should be able to access the application's static files (e.g. try accessing `http://localhost/media/static/admin/img/icon_searchbox.png`).
+      
+Setting up MS SQL as the Django database
 -------------------
 
 1. [Download MS SQL Server Express 2008](http://www.microsoft.com/en-us/download/details.aspx?id=1695) and [SQL Server Express Management Studio](http://www.microsoft.com/en-us/download/details.aspx?id=7593) and install each.
@@ -129,7 +200,13 @@ Setting up MS SQL
             'PASSWORD': 'ASuperSecurePassWordToMakeWindowsHappy!',
             }
         }
-  
+
+1. Initialize the database by opening a command prompt, `cd`ing to `c:\inetpub\django` and executing the following:
+
+        python manage.py syncdb
+
+_CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and add items as an anonymous user.
+        
 Setting up connection to LDAP
 -------------------
 
@@ -139,16 +216,8 @@ With this setup, each user in the targeted LDAP directory will be added as a use
 
 1. Change the value of `AUTH_LDAP_SERVER_URI` in `settings.py` to match the location for your server.
 1. Change the value of `AUTH_LDAP_USER_DN_TEMPLATE` in `settings.py`, in particular the `DSEF.private` component, to match the location for your server.
-  
-Getting it running
--------------------
-1. Initialize the database by opening a command prompt,  `cd`ing to `c:\inetpub\django` and executing the following
 
-        python manage.py syncdb
-    
-1. That should be all.
-
-  Visit `http://localhost:8090/` in a browser to see the to do list.  Add to-do tasks to check your database connection.
+_CHECKPOINT:_ You should now be able to access `http://localhost/` on the server, login as one of the users in the Active Directory system you connected to, and leave to-do items as that user.
   
 Notes
 -------------------
@@ -158,15 +227,7 @@ Notes
 
 * If you change anything in `c:\PyISAPIe` or `c:\inetpub\django` (the application driver directory and your application directory, respectively), you may need to recycle your application pool to see these changes take effect.
 
-  To do this, click on `Application Pools` in the left view pane of the IIS Manager, select `DjangoApp`, and click the `Recycle` task in the right view pane.
-
-* You may want to run your site on port 80 so you don't have to type in a port number when accessing it, and you don't have to play with Windows Firewall settings to open a new port.
-
-  * To change the ports, start the IIS Manager and click on "Sites" on the left pane.  
-  * Right click on a site and select "bindings".
-  * Click on the port binding you want to edit and select "Edit...".
-  * Change the port number in the dialog window that pops up and click "OK" then "Close" to accept the changes and close both dialog boxes.
-  * You then must click "Restart" under the "Manage Web Site" heading on the right pane of the IIS Manger for these changes to take effect.
+  To do this, click on _Application Pools_ in the left view pane of the IIS Manager, select _DjangoApp_, and click the _Recycle_ task in the right view pane.
   
 !!TODO!!
 -------------------
