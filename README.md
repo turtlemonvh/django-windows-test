@@ -9,7 +9,7 @@ Where this comes from
 * The to-do app used here is almost completely taken from [this net tuts tutorial](http://net.tutsplus.com/tutorials/python-tutorials/intro-to-django-building-a-to-do-list/) with a few changes to make it cleaner (e.g. use of django forms).
 * More information about PyISAPIe was taken from [a blog post by geographika](http://geographika.co.uk/setting-up-python-on-iis7).
 
-Installing and configuring python and pytrhon packages on target machine
+Installing and configuring python and python packages on target machine
 -------------------
 1. Get this project onto the target machine
 
@@ -62,7 +62,7 @@ Setting up IIS to talk to Python through PyISAPIe
 
   In the `c:\PyISAPIe` folder, and add the dll at `c:\PyISAPIe\PyISAPIe.dll`.
   
-  There should also be a few folders in that zip file from wolf++.    Inside the `Http` directory, modify the file `Isapi.py` modify the statement modyfying the path to `os.sys.path.append('C:\inetpub\PyApp\django-windows-test\windowstest')`.  
+  There should also be a few folders in that zip file from wolf++.    Inside the `Http` directory, modify the file `Isapi.py` modify the statement modyfying the path to `os.sys.path.append('C:\inetpub\djangoapp\django-windows-test\windowstest')`.  
 
   In the `Map` array, modify the middle portion to read `["/"     , "windowstest.settings"  ],`.    This associates your django project with the root url of this IIS web server, a bit like [Apache VirtualHosts](http://httpd.apache.org/docs/2.2/vhosts/).
   
@@ -75,7 +75,7 @@ Setting up IIS to talk to Python through PyISAPIe
   * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
   * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
 
-1. Create directory `c:\inetpub\django` where you can add this project
+1. Create directory `c:\inetpub\djangoapp` where you can add this project
 
 1. Get the project in that directory
   You can download the zip file and unzip to that directory, or [install a flavor of git that plays nice with Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) and clone into that directory.
@@ -85,7 +85,7 @@ Setting up IIS to talk to Python through PyISAPIe
 
   * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
       * Set name to _DjangoApp_
-      * Set physical path to `c:\inetpub\django`
+      * Set physical path to `c:\inetpub\djangoapp`
       * Set port to `8090` or another unused port
   * Left (select) click on the new site to get to the main options screen.
   * Under `IIS`, double click on `Handler Mappings` to option that dialog
@@ -106,6 +106,20 @@ Setting up IIS to talk to Python through PyISAPIe
 
 _CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and see a Django error page.  You can't see the home page yet because the database hasn't been configured.
 
+If you want to check that the site works you can just use the default sqlite database included with this project.  To do this, change your `DATABASE` variable in `settings.py` to the following:
+
+      DATABASES = {
+          "default": {
+              "ENGINE": "django.db.backends.sqlite3", # Add "postgresql_psycopg2", "postgresql", "mysql", "sqlite3" or "oracle".
+              "NAME": "to-do.db",                       # Or path to database file if using sqlite3.
+              "USER": "",                             # Not used with sqlite3.
+              "PASSWORD": "",                         # Not used with sqlite3.
+              "HOST": "",                             # Set to empty string for localhost. Not used with sqlite3.
+              "PORT": "",                             # Set to empty string for default. Not used with sqlite3.
+          }
+      }
+
+
 Serving static files for Django directly via IIS
 -------------------
 1. Make sure your `PyISAPIe` handler is defined as a `ScriptMap` and not a `Wildcard Script Map`.  A wildcard map will intercept every request for every file in all sub folders which would not allow your static files to be served.
@@ -123,7 +137,7 @@ Serving static files for Django directly via IIS
         STATIC_ROOT = 'media/static/'
         STATIC_URL = '/media/static/'
 
-1. Run `python manage.py collectstatic` at the command line to collect static and media files into the target directories.
+1. `cd` to `c:\inetpub\djangoapp\django-windows-test\windowstest` and run `python manage.py collectstatic` at the command line to collect static and media files into the target directories.
         
 1. Add a Virtual Directory to the _DjangoApp_ web site in IIS Manager
 
@@ -142,7 +156,7 @@ Serving static files for Django directly via IIS
     1. In the right _Actions_ pane of the _Handler Mappings_ view, click the _View Ordered List_ link.
     1. Use the arrows in the right pane of the resulting view to move the `StaticFile` handler up to the top of the list, above the `PyISAPIe` handler.
    
-1. Create a new `web.config` file in `c:\inetpub\django\django-windows-test\windowstest\` with the following contents.
+1. Create a new `web.config` file in `c:\inetpub\djangoapp\django-windows-test\windowstest\` with the following contents.
 
         <configuration>
             <system.webServer>
@@ -201,12 +215,12 @@ Setting up MS SQL as the Django database
             }
         }
 
-1. Initialize the database by opening a command prompt, `cd`ing to `c:\inetpub\django` and executing the following:
+1. Initialize the database by opening a command prompt, `cd`ing to `c:\inetpub\djangoapp\django-windows-test\windowstest` and executing the following:
 
         python manage.py syncdb
 
 _CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and add items as an anonymous user.
-        
+
 Setting up connection to LDAP
 -------------------
 
@@ -217,15 +231,29 @@ With this setup, each user in the targeted LDAP directory will be added as a use
 1. Change the value of `AUTH_LDAP_SERVER_URI` in `settings.py` to match the location for your server.
 1. Change the value of `AUTH_LDAP_USER_DN_TEMPLATE` in `settings.py`, in particular the `DSEF.private` component, to match the location for your server.
 
+At this point we found there was still an error coming from the `python-ldap` module based off the way debug functions were structured.  Replacing the file `PYTHON_BASE_DIR\Lib\site-packages\ldap\functions.py` with the contents of `python-ldap-fix\functions_fixed.py` allowed us to connect.
+
+This error seems to come about because somewhere the special constant `__debug__` is being manipulated in a way that causes it to behave strangely.  More details can be found in [this stackexchange post](http://stackoverflow.com/questions/15305688/conditional-debug-statement-not-executed-though-debug-is-true).  We're working on a better solution.
+
 _CHECKPOINT:_ You should now be able to access `http://localhost/` on the server, login as one of the users in the Active Directory system you connected to, and leave to-do items as that user.
   
-Notes
+Notes and Tips
 -------------------
 * If you are getting the error `You probably did a passthrough with PyISAPIe configured as an application map instead of a wildcard map` (displayed as a generic error page in IE)
 
   Check to make sure you defined your hander mapping for PyISAPIe as a "Wildcard Script Map" and not a "Script Map".
 
-* If you change anything in `c:\PyISAPIe` or `c:\inetpub\django` (the application driver directory and your application directory, respectively), you may need to recycle your application pool to see these changes take effect.
+* If you are having problems with the handler mappings, it may help to look at the raw configuration files used for your site to check for errors.
+
+  In particular the following 3 configuration files are good to examine:
+
+  1. `C:\Windows\System32\inetserv\Config\applicationHost.config` - the main configuration for IIS
+  1. `C:\inetpub\djangoapp\django-windows-test\windowstest\web.config` - the main configuration file for the _djangoapp_ site
+  1. `C:\inetpub\djangoapp\django-windows-test\windowstest\media\web.config` - the configuration file for the _media_ virtual directory
+  
+  [This article about the sites portion of the main IIS configuration file](http://www.iis.net/learn/get-started/planning-your-iis-architecture/understanding-sites-applications-and-virtual-directories-on-iis#Configuration) may also be helpful.
+
+* If you change anything in `c:\PyISAPIe` or `c:\inetpub\djangoapp` (the application driver directory and your application directory, respectively), you may need to recycle your application pool to see these changes take effect.
 
   To do this, click on _Application Pools_ in the left view pane of the IIS Manager, select _DjangoApp_, and click the _Recycle_ task in the right view pane.
   
