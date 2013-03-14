@@ -1,3 +1,8 @@
+<html>
+<head>
+<link href="/media/static/css/core.css" media="screen" rel="stylesheet" type="text/css">
+</head>
+<body>
 <h2>To Do</h2>
 {% if user.is_authenticated %}
     <p>Welcome, {{ user.username }}. Thanks for logging in.  You can log out <a href="{% url 'logout' %}">here</a>.</p>
@@ -15,3 +20,5 @@
 {{ form.as_p }}
 <input type="submit" value="Submit" />
 </form>
+<body>
+</html>

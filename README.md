@@ -72,8 +72,8 @@ Setting up IIS to talk to Python through PyISAPIe
 
   These are needed for the DLL file downloaded / compiled in the previous step to work.
 
-  * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
-  * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
+    * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
+    * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
 
 1. Create directory `c:\inetpub\djangoapp` where you can add this project
 
@@ -83,26 +83,26 @@ Setting up IIS to talk to Python through PyISAPIe
 1. Add a new site using the IIS Manager
   Here you will add a site and set it up to be handled by python via isapi.
 
-  * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
-      * Set name to _DjangoApp_
-      * Set physical path to `c:\inetpub\djangoapp`
-      * Set port to `8090` or another unused port
-  * Left (select) click on the new site to get to the main options screen.
-  * Under `IIS`, double click on `Handler Mappings` to option that dialog
-  * In the right pane under `Actions`, select the `Add Wildcard Script Map` option
-      * Set request path to `*`
-      * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
-      * Set name to `PyISAPIe`
+    * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
+        * Set name to _DjangoApp_
+        * Set physical path to `c:\inetpub\djangoapp`
+        * Set port to `8090` or another unused port
+    * Left (select) click on the new site to get to the main options screen.
+    * Under `IIS`, double click on `Handler Mappings` to option that dialog
+    * In the right pane under `Actions`, select the `Add Wildcard Script Map` option
+        * Set request path to `*`
+        * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
+        * Set name to `PyISAPIe`
 
 1. Set the new site to run on port *80, and change the default website to run on *8090.
 
-   You may want to run your site on port 80 so you don't have to type in a port number when accessing it and you don't have to play with Windows Firewall settings to open a new port.
+    You may want to run your site on port 80 so you don't have to type in a port number when accessing it and you don't have to play with Windows Firewall settings to open a new port.
 
-  * To change the port for a website, start the IIS Manager and click on _Sites_ on the left pane.  
-  * Right click on a site and select _bindings_.
-  * Click on the port binding you want to edit and select _Edit..._.
-  * Change the port number in the dialog window that pops up and click _OK_ then _Close_ to accept the changes and close both dialog boxes.
-  * You then must click _Restart_ under the _Manage Web Site_ heading on the right pane of the IIS Manger for these changes to take effect.
+    * To change the port for a website, start the IIS Manager and click on _Sites_ on the left pane.  
+    * Right click on a site and select _bindings_.
+    * Click on the port binding you want to edit and select _Edit..._.
+    * Change the port number in the dialog window that pops up and click _OK_ then _Close_ to accept the changes and close both dialog boxes.
+    * You then must click _Restart_ under the _Manage Web Site_ heading on the right pane of the IIS Manger for these changes to take effect.
 
 _CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and see a Django error page.  You can't see the home page yet because the database hasn't been configured.
 
@@ -132,10 +132,10 @@ Serving static files for Django directly via IIS
 
 1. Configure `settings.py` to use the following values defining the location of static and media files.
 
-        MEDIA_ROOT = 'media/media/'
+        MEDIA_ROOT = 'C:\inetpub\PyApp\media\media'
         MEDIA_URL = 'media/media/'
-        STATIC_ROOT = 'media/static/'
-        STATIC_URL = '/media/static/'
+        STATIC_ROOT = 'C:\inetpub\PyApp\media\static'
+        STATIC_URL = 'media/static/'
 
 1. `cd` to `c:\inetpub\djangoapp\django-windows-test\windowstest` and run `python manage.py collectstatic` at the command line to collect static and media files into the target directories.
         
@@ -154,7 +154,8 @@ Serving static files for Django directly via IIS
     1. In IIS Manager click on the `media` virtual directory folder to select
     1. In the center options pane under _IIS_ double click _Handler Mappings_.
     1. In the right _Actions_ pane of the _Handler Mappings_ view, click the _View Ordered List_ link.
-    1. Use the arrows in the right pane of the resulting view to move the `StaticFile` handler up to the top of the list, above the `PyISAPIe` handler.
+    1. Use the arrows in the right pane of the resulting view to move the `StaticFile` handler up to the top of the list
+    1. Delete the `PyISAPIe` handler from the list (**Note**: this only deletes the handler in the context of this virtual directory).
    
 1. Create a new `web.config` file in `c:\inetpub\djangoapp\django-windows-test\windowstest\` with the following contents.
 
@@ -221,6 +222,30 @@ Setting up MS SQL as the Django database
 
 _CHECKPOINT:_ You should now be able to access `http://localhost/` on the server and add items as an anonymous user.
 
+You can also manually configure the port MS SQL server serves from to allow additional connection options.
+
+1. Open "SQL Server Configuration Manager" ("Start" > "All programs" > "Microsoft SQL Server 2008" > "Configuration Tools" > "SQL Server Configuration Manager")
+1. In left pane under "SQL Server Network Configuration", click "Protocols for SQLEXPRESS"
+1. In main pane, right click "TCP/IP", click "Properties"
+1. In dialog box, click "IP Addresses" tab.
+1. Scroll toward bottom. Under IPAll, change TCP Port to 1433 (this is the default db port on most systems).
+1. To check that this worked, open a command prompt and type: "netstat -ab".  You should see an entry that resembles the following, with "dsef-test" replaced by the name of your machine.
+
+        TCP    0.0.0.0:1433           dsef-test:0            LISTENING      [sqlservr.exe]
+
+1. After doing this, you can also connect to the database using the following DATABASES configuration in `settings.py`, 2here the ip address in "host" is replaced by your machine's ip address (or you can just use '127.0.0.1' if connecting locally).
+
+        DATABASES = {
+         'default': {
+         'NAME': 'dsef',
+         'ENGINE': 'sqlserver_ado',
+         'HOST': '10.20.30.181',
+         'USER': 'dsef_test_user',
+         'PASSWORD': 'NewPassword1!',
+         'PORT': '1433',
+         }
+        }
+      
 Setting up connection to LDAP
 -------------------
 
