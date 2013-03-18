@@ -72,8 +72,8 @@ Setting up IIS to talk to Python through PyISAPIe
 
   These are needed for the DLL file downloaded / compiled in the previous step to work.
 
-    * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
-    * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
+  * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
+  * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
 
 1. Create directory `c:\inetpub\djangoapp` where you can add this project
 
@@ -83,16 +83,16 @@ Setting up IIS to talk to Python through PyISAPIe
 1. Add a new site using the IIS Manager
   Here you will add a site and set it up to be handled by python via isapi.
 
-    * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
-        * Set name to _DjangoApp_
-        * Set physical path to `c:\inetpub\djangoapp`
-        * Set port to `8090` or another unused port
-    * Left (select) click on the new site to get to the main options screen.
-    * Under `IIS`, double click on `Handler Mappings` to option that dialog
-    * In the right pane under `Actions`, select the `Add Wildcard Script Map` option
-        * Set request path to `*`
-        * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
-        * Set name to `PyISAPIe`
+  * Right click on the `Sites` folder in the left view pane and select the `Add Web Site...` option
+      * Set name to _DjangoApp_
+      * Set physical path to `c:\inetpub\djangoapp`
+      * Set port to `8090` or another unused port
+  * Left (select) click on the new site to get to the main options screen.
+  * Under `IIS`, double click on `Handler Mappings` to option that dialog
+  * In the right pane under `Actions`, select the `Add Wildcard Script Map` option
+      * Set request path to `*`
+      * Set executable to `c:\PyISAPIe\PyISAPIe.dll`
+      * Set name to `PyISAPIe`
 
 1. Set the new site to run on port *80, and change the default website to run on *8090.
 
