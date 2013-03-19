@@ -13,7 +13,7 @@ Installing and configuring python and python packages on target machine
 -------------------
 1. Get this project onto the target machine
 
-    Create a new folder `c:\PyISAPIe` and clone the project into this folder.  [Msysgit](http://msysgit.github.com/) is a great git package for Windows if you're looking for one. 
+    Create a new directory `djangoapp` in `c:\inetpub` and clone the project into that folder.  [Msysgit](http://msysgit.github.com/) is a great git package for Windows if you're looking for one. 
 
         git clone git@github.com:turtlemonvh/django-windows-test.git
 
@@ -60,11 +60,11 @@ Setting up IIS to talk to Python through PyISAPIe
 -------------------
 1. Download pre-compiled PyISAPIe dll from [the installation tutorial on wolf++].
 
-  In the `c:\PyISAPIe` folder, and add the dll at `c:\PyISAPIe\PyISAPIe.dll`.
+  Extract the `PyISAPIe.dll` and the `Http` folder to `c:\PyISAPIe\`.  Make sure `Http` contains `DjangoMap.py` and `Isapi.py`.
   
-  There should also be a few folders in that zip file from wolf++.    Inside the `Http` directory, modify the file `Isapi.py` modify the statement modyfying the path to `os.sys.path.append('C:\inetpub\djangoapp\django-windows-test\windowstest')`.  
+  Inside the `Http` directory, modify the file `Isapi.py` modify the statement modifying the path to `os.sys.path.append('C:\inetpub\djangoapp\django-windows-test\windowstest')`.  You may also have to add `import os` and `import sys` to the top of this file.
 
-  In the `Map` array, modify the middle portion to read `["/"     , "windowstest.settings"  ],`.    This associates your django project with the root url of this IIS web server, a bit like [Apache VirtualHosts](http://httpd.apache.org/docs/2.2/vhosts/).
+  In the `Map` array in `Isapi.py`, modify the middle portion to read `["/"     , "windowstest.settings"  ],`.    This associates your django project with the root url of this IIS web server, a bit like [Apache VirtualHosts](http://httpd.apache.org/docs/2.2/vhosts/).
   
   If you are not using Python 2.7.2 and running on a 64 bit operating system you may need to compile the executable yourself.  The tutorial also has instructions for doing that.
 
@@ -74,11 +74,6 @@ Setting up IIS to talk to Python through PyISAPIe
 
   * [Link to 2008 download page](http://www.microsoft.com/en-us/download/details.aspx?id=29)
   * [Link to 2010 download page](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
-
-1. Create directory `c:\inetpub\djangoapp` where you can add this project
-
-1. Get the project in that directory
-  You can download the zip file and unzip to that directory, or [install a flavor of git that plays nice with Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) and clone into that directory.
 
 1. Add a new site using the IIS Manager
   Here you will add a site and set it up to be handled by python via isapi.
