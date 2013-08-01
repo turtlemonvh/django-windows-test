@@ -189,7 +189,6 @@ Setting up MS SQL as the Django database
     * Note that the username and password combination you enter here is what will go in your `settings.py` for configuring database access.
   1. Select the database you created in the previous step as the default database for this user.
   1. Click `OK` to create the user.
-1. Right click on the `Security` folder of the new database to create a new user.
 1. Give this new user permission to create, edit, and view tables in your new database.
   1. Under the `Databases` folder, find the folder for your database and expand it.
   1. Locate the `Security` folder and expand it.
@@ -198,7 +197,7 @@ Setting up MS SQL as the Django database
   1. Click the ellipses to the right of `Login name`.
   1. In the `Select Login` dialog box, click the `Browse` button to open a dialog to browse for existing users.
   1. Click the checkbox next to the user you created previously, and click `OK` on both dialog boxes.
-  1. Back in the `Database User` dialog box, check the following options under both `Owned Schemas` and `Role Members`: "db\_accessadmin, db\_datareader, db\_datawriter, db\_ddl\_admin".
+  1. Back in the `Database User` dialog box, check the following options under both `Owned Schemas` and `Role Members`: "db\_accessadmin, db\_datareader, db\_datawriter, db\_ddl\_admin, db\_owner".
 1. Edit `settings.py` to use the parameters for your mssql installation
 
         DATABASES = {
